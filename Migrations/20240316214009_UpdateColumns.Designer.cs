@@ -3,6 +3,7 @@ using Lab3WebAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab3WebAPI.Migrations
 {
     [DbContext(typeof(TelephoneDbContext))]
-    partial class TelephoneDBModelSnapshot : ModelSnapshot
+    [Migration("20240316214009_UpdateColumns")]
+    partial class UpdateColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +44,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Administrators", (string)null);
+                    b.ToTable("Administrators");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Bill", b =>
@@ -65,7 +68,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasIndex("SubscriberId");
 
-                    b.ToTable("Bills", (string)null);
+                    b.ToTable("Bills");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Service", b =>
@@ -88,7 +91,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Subscriber", b =>
@@ -113,7 +116,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subscribers", (string)null);
+                    b.ToTable("Subscribers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -132,7 +135,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityRole", (string)null);
+                    b.ToTable("IdentityRole");
 
                     b.HasData(
                         new
@@ -173,7 +176,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasIndex("SubscribersId");
 
-                    b.ToTable("ServiceSubscriber", (string)null);
+                    b.ToTable("ServiceSubscriber");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Bill", b =>

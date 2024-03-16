@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using Lab3WebAPI.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lab3WebAPI.Entities
@@ -22,25 +22,26 @@ namespace Lab3WebAPI.Entities
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(TelephoneDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
-       /*    modelBuilder.Entity<Subscriber>()
-            .HasKey(u => new { u.Id });
+            /*    modelBuilder.Entity<Subscriber>()
+                 .HasKey(u => new { u.Id });
 
-            modelBuilder.Entity<Service>()
-                .HasKey(e => new { e.Id });
+                 modelBuilder.Entity<Service>()
+                     .HasKey(e => new { e.Id });
 
-            modelBuilder.Entity<SubscriberServices>()
-                .HasKey(ue => new { ue.UserName, ue.ServicesName });
+                 modelBuilder.Entity<SubscriberServices>()
+                     .HasKey(ue => new { ue.UserName, ue.ServicesName });
 
-            modelBuilder.Entity<SubscriberServices>()
-                .HasOne(ue => ue.Subscriber)
-                .WithMany(user => user.Services)
-                .HasForeignKey(u => u.Id);
+                 modelBuilder.Entity<SubscriberServices>()
+                     .HasOne(ue => ue.Subscriber)
+                     .WithMany(user => user.Services)
+                     .HasForeignKey(u => u.Id);
 
-            modelBuilder.Entity<SubscriberServices>()
-                .HasOne(uc => uc.Service)
-                .WithMany(ev => ev.Subscribers)
-                .HasForeignKey(ev => ev.Id);*/
+                 modelBuilder.Entity<SubscriberServices>()
+                     .HasOne(uc => uc.Service)
+                     .WithMany(ev => ev.Subscribers)
+                     .HasForeignKey(ev => ev.Id);*/
         }
 
 

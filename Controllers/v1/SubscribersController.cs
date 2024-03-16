@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Lab3WebAPI.Entities;
 using Asp.Versioning;
 using Lab3WebAPI.Services;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Lab3WebAPI.Models;
 

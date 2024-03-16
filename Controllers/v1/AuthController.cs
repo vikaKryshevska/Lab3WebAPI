@@ -3,7 +3,6 @@ using AutoMapper;
 using Lab3WebAPI.Entities;
 using Lab3WebAPI.Models;
 using Lab3WebAPI.Services;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,16 +27,16 @@ namespace Lab3WebAPI.Controllers.v1
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public ActionResult<string> Login(LoginRequestModel userModel)
+        public ActionResult<string> Login(AuthRequestModel userModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    if (this.authService.IsAuthenticated(userModel.Name, userModel.Password))
+                    if (this.authService.IsAuthenticated(userModel.Email, userModel.Password))
                     {
-                        var user = this.authService.GetByName(userModel.Name);
-                        var token = this.authService.GenerateJwtToken(userModel.Name, user.Name);
+                        var user = this.authService.GetByName(userModel.Email);
+                        var token = this.authService.GenerateJwtToken(userModel.Email, user.Email);
 
                         return Ok(Json(token));
                     }
@@ -55,7 +54,7 @@ namespace Lab3WebAPI.Controllers.v1
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public ActionResult<string> Register(RegisterInputModel userModel)
+        public ActionResult<string> Register(RegisterRequestModel userModel)
         {
             try
             {
@@ -71,7 +70,7 @@ namespace Lab3WebAPI.Controllers.v1
                         return BadRequest("User already exists!");
                     }
 
-                    var mappedModel = this.mapper.Map<RegisterInputModel, Subscriber>(userModel);
+                    var mappedModel = this.mapper.Map<RegisterRequestModel, Subscriber>(userModel);
                     mappedModel.Role ="User";
                     var user = this.authService.RegisterUser(mappedModel);
 

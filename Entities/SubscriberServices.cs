@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-
+﻿
 namespace Lab3WebAPI.Entities
 {
     public class SubscriberServices

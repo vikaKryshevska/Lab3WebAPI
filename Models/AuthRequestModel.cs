@@ -2,11 +2,13 @@
 
 namespace Lab3WebAPI.Models
 {
-    public class LoginRequestModel
+    public class AuthRequestModel
     {
 
-        public string? Name { get; set; }
+        public string? Email { get; set; }
 
         public string? Password { get; set; }
+
+
     }
 }

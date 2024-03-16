@@ -1,5 +1,4 @@
 ﻿using Lab3WebAPI.Entities;
-using Microsoft.AspNet.Identity;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Lab3WebAPI.Models
 {
-    public class RegisterInputModel
+    public class RegisterRequestModel
     {
 
+        [EmailAddress]
+        public string Email { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -14,7 +16,6 @@ namespace Lab3WebAPI.Models
         public string Password { get; set; }
 
         [Required]
-        public string ConfirmedPassword {get; set;}
-        public Role Role { get; set; }
+        public string ConfirmedPassword { get; set; }
     }
 }

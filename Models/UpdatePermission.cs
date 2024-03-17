@@ -1,14 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace Lab3WebAPI.Models
 {
-    public class AuthRequestModel
+    public class UpdatePermission
     {
-
-        public string Email { get; set; }
+        [Required(ErrorMessage = "UserName is required")]
         public string Name { get; set; }
-        public string Password { get; set; }
-
 
     }
 }

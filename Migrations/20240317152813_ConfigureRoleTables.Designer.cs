@@ -4,6 +4,7 @@ using Lab3WebAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab3WebAPI.Migrations
 {
     [DbContext(typeof(TelephoneDbContext))]
-    partial class TelephoneDBModelSnapshot : ModelSnapshot
+    [Migration("20240317152813_ConfigureRoleTables")]
+    partial class ConfigureRoleTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,69 +24,6 @@ namespace Lab3WebAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Lab3WebAPI.Entities.Account", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("IdentityRoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("IdentityRoleId1")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdentityRoleId1");
-
-                    b.ToTable("Account");
-                });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Administrator", b =>
                 {
@@ -97,8 +37,9 @@ namespace Lab3WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdentityRoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("IdentityRoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -110,7 +51,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasIndex("IdentityRoleId");
 
-                    b.ToTable("Administrators");
+                    b.ToTable("IdentityUserRole<ADMIN>");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Bill", b =>
@@ -172,8 +113,9 @@ namespace Lab3WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdentityRoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("IdentityRoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -187,7 +129,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasIndex("IdentityRoleId");
 
-                    b.ToTable("Subscribers");
+                    b.ToTable("IdentityUserRole<SUBSCRIBER>");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -211,25 +153,25 @@ namespace Lab3WebAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "820c523d-1c65-46c8-909b-13fdb497a81d",
+                            Id = "57560414-c1f8-44c9-9116-4df705ea19b9",
                             Name = "Subscriber",
                             NormalizedName = "SUBSCRIBER"
                         },
                         new
                         {
-                            Id = "963b3755-421f-483e-8cb9-07443301b9af",
+                            Id = "bc3f1c97-00b2-4fc0-83c3-5f0e893f2927",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "b1395323-91da-4e46-98f8-981a4f91dd4f",
+                            Id = "b6df8d18-e983-454a-8421-03c9ab1bd1d6",
                             Name = "Subscriber",
                             NormalizedName = "SUBSCRIBER"
                         },
                         new
                         {
-                            Id = "614ab4a3-0269-4fe6-8e42-a7690ce6248e",
+                            Id = "ac1d5add-6a97-4c2c-b951-a16178c355d9",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });
@@ -245,6 +187,11 @@ namespace Lab3WebAPI.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -285,19 +232,10 @@ namespace Lab3WebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IdentityUser");
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.ToTable("IdentityUserRole<Guid>");
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("ServiceSubscriber", b =>
@@ -317,11 +255,17 @@ namespace Lab3WebAPI.Migrations
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Account", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "IdentityRole")
-                        .WithMany()
-                        .HasForeignKey("IdentityRoleId1");
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Navigation("IdentityRole");
+                    b.Property<Guid>("IdentityRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("IdentityRoleId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("IdentityRoleId1");
+
+                    b.HasDiscriminator().HasValue("Account");
                 });
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Administrator", b =>
@@ -370,6 +314,15 @@ namespace Lab3WebAPI.Migrations
                         .HasForeignKey("Subscribersid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Lab3WebAPI.Entities.Account", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "IdentityRole")
+                        .WithMany()
+                        .HasForeignKey("IdentityRoleId1");
+
+                    b.Navigation("IdentityRole");
                 });
 #pragma warning restore 612, 618
         }

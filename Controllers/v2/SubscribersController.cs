@@ -48,7 +48,7 @@ namespace Lab3WebAPI.Controllers.v2
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSubscriber(int id, Subscriber subscriber)
         {
-            if (id != subscriber.Id)
+            if (id != subscriber.id)
             {
                 return BadRequest();
             }
@@ -82,7 +82,7 @@ namespace Lab3WebAPI.Controllers.v2
             _context.Subscribers.Add(subscriber);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSubscriber", new { id = subscriber.Id }, subscriber);
+            return CreatedAtAction("GetSubscriber", new { id = subscriber.id }, subscriber);
         }
 
         // DELETE: api/Subscribers/5
@@ -103,7 +103,7 @@ namespace Lab3WebAPI.Controllers.v2
 
         private bool SubscriberExists(int id)
         {
-            return _context.Subscribers.Any(e => e.Id == id);
+            return _context.Subscribers.Any(e => e.id == id);
         }
     }
 }

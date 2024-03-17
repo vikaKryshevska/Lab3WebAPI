@@ -41,7 +41,7 @@ namespace Lab3WebAPI.Services
 
         public Subscriber GetById(int id)
         {
-            return this.dataContext.Subscribers.FirstOrDefault(c => c.Id == id);
+            return this.dataContext.Subscribers.FirstOrDefault(c => c.id == id);
         }
         public Subscriber[] GetAll()
         {

@@ -43,20 +43,6 @@ namespace Lab3WebAPI.Controllers.v1
                 }
             }
 
-            [Authorize]
-            [HttpPost("Role")]
-            public ActionResult<Subscriber> ChangeRole(UserChangeRoleInputModel model)
-            {
-                try
-                {
-                    var user = this.authService.ChangeRole(model.Name, model.Role);
-                    return Ok(user);
-                }
-                catch (Exception error)
-                {
-                    logger.LogError(error.Message);
-                    return StatusCode(500);
-                }
-            }
+            
         }
 }

@@ -4,7 +4,12 @@ using Lab3WebAPI.Entities;
 using Lab3WebAPI.Models;
 using Lab3WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Lab3WebAPI.Controllers.v1
 {
@@ -14,83 +19,146 @@ namespace Lab3WebAPI.Controllers.v1
     [ApiController]
     public class AuthController : Controller
     {
-        private readonly IMapper mapper;
-        private readonly ILogger logger;
-        private readonly AuthService authService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ILogger logger, AuthService authService, IMapper mapper)
+        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
-            this.authService = authService;
-            this.mapper = mapper;
-            this.logger = logger;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _configuration = configuration;
         }
 
-        [AllowAnonymous]
-        [HttpPost("Login")]
-        public ActionResult<string> Login(AuthRequestModel userModel)
+        // Route For Seeding my roles to DB
+        [HttpPost]
+        [Route("seed-roles")]
+        public async Task<IActionResult> SeedRoles()
         {
-            try
+            bool isAdminRoleExists = await _roleManager.RoleExistsAsync(UserRoles.ADMIN);
+            bool isUserRoleExists = await _roleManager.RoleExistsAsync(UserRoles.SUBSCRIBER);
+
+            if ( isAdminRoleExists && isUserRoleExists)
+                return Ok("Roles Seeding is Already Done");
+
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.SUBSCRIBER));
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.ADMIN));
+
+            return Ok("Role Seeding Done Successfully");
+        }
+
+
+        // Route -> Register
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel registerDto)
+        {
+          /*  if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                // Copy data from RegisterViewModel to IdentityUser
+                var user = new IdentityUser
                 {
-                    if (this.authService.IsAuthenticated(userModel.Email, userModel.Password))
-                    {
-                        var user = this.authService.GetByName(userModel.Email);
-                        var token = this.authService.GenerateJwtToken(userModel.Email, user.Email);
-
-                        return Ok(Json(token));
-                    }
-                    return BadRequest("Email or password are not correct!");
-                }
-
-                return BadRequest(ModelState);
+                    UserName = registerDto.Name,
+                    Email = registerDto.Password
+                };
             }
-            catch (Exception error)
-            {
-                logger.LogError(error.Message);
-                return StatusCode(500);
-            }
-        }
 
-        [AllowAnonymous]
-        [HttpPost("Register")]
-        public ActionResult<string> Register(RegisterRequestModel userModel)
-        {
-            try
+*/
+                var isExistsUser = await _userManager.FindByNameAsync(registerDto.Name);
+
+            if (isExistsUser != null)
+                return BadRequest("UserName Already Exists");
+
+            IdentityUser newUser = new IdentityUser()
             {
-                if (ModelState.IsValid)
+                UserName = registerDto.Name,
+                SecurityStamp = Guid.NewGuid().ToString(),
+            };
+
+            var createUserResult = await _userManager.CreateAsync(newUser, registerDto.Password);
+
+            if (!createUserResult.Succeeded)
+            {
+                var errorString = "User Creation Failed Beacause: ";
+                foreach (var error in createUserResult.Errors)
                 {
-                    if (userModel.Password != userModel.ConfirmedPassword)
-                    {
-                        return BadRequest("Passwords does not match!");
-                    }
-
-                    if (this.authService.DoesSubscribersExists(userModel.Name))
-                    {
-                        return BadRequest("User already exists!");
-                    }
-
-                    var mappedModel = this.mapper.Map<RegisterRequestModel, Subscriber>(userModel);
-                    mappedModel.Role ="User";
-                    var user = this.authService.RegisterUser(mappedModel);
-
-                    if (user != null)
-                    {
-                        var token = this.authService.GenerateJwtToken(user.Name, mappedModel.Role);
-                        return Ok(Json(token));
-
-                    }
-
-                    return BadRequest("Email or password are not correct!");
+                    errorString += " # " + error.Description;
                 }
+                return BadRequest(errorString);
+            }
 
-                return BadRequest(ModelState);
-            }
-            catch (Exception error)
-            {
-                logger.LogError(error.Message);
-                return StatusCode(500);
-            }
+            // Add a Default USER Role to all users
+            await _userManager.AddToRoleAsync(newUser, UserRoles.SUBSCRIBER);
+
+            return Ok("User Created Successfully");
         }
+
+
+        // Route -> Login
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] AuthRequestModel loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Name);
+
+            if (user is null)
+                return Unauthorized("Invalid Credentials");
+
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (!isPasswordCorrect)
+                return Unauthorized("Invalid Credentials");
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim("JWTID", Guid.NewGuid().ToString()),
+            };
+
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
+
+            var token = GenerateNewJsonWebToken(authClaims);
+
+            return Ok(token);
+        }
+
+        private string GenerateNewJsonWebToken(List<Claim> claims)
+        {
+            var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var tokenObject = new JwtSecurityToken(
+                    issuer: _configuration["JWT:ValidIssuer"],
+                    audience: _configuration["JWT:ValidAudience"],
+                    expires: DateTime.Now.AddHours(1),
+                    claims: claims,
+                    signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
+                );
+
+            string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
+
+            return token;
+        }
+
+        // Route -> make user -> admin
+        [HttpPost]
+        [Route("make-admin")]
+        public async Task<IActionResult> MakeAdmin([FromBody] UpdatePermission updatePermissionDto)
+        {
+            var user = await _userManager.FindByNameAsync(updatePermissionDto.Name);
+
+            if (user is null)
+                return BadRequest("Invalid User name!!!!!!!!");
+
+            await _userManager.AddToRoleAsync(user, UserRoles.ADMIN);
+
+            return Ok("User is now an ADMIN");
+        }
+
     }
 }

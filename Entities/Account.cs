@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Principal;
 
 namespace Lab3WebAPI.Entities
 {
-    public class Account : IdentityUser
+    // [Table("AspNetUsers")]
+    public partial class Account : IdentityUser<Guid>
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+
+        public int Id { get; set; }
+        public Guid IdentityRoleId { get; set; }
+        public virtual IdentityRole IdentityRole { get; set; }
+
     }
 }

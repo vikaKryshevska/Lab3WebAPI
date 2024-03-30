@@ -5,6 +5,6 @@ namespace Lab3WebAPI.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(IdentityUser user);
+        string GenerateToken(IdentityUser user, String role);
     }
 }

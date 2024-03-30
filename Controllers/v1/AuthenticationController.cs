@@ -36,52 +36,11 @@ namespace Lab3WebAPI.Controllers.v1
             _roleSeeder = roleSeeder;
         }
 
-        [Authorize(Roles = "ADMIN")]
-        // Route For Seeding my roles to DB
-        [HttpPost]
-        [Route("seed-roles")]
-        public async Task<IActionResult> SeedRoles()
-        {
-
-            try
-            {
-                await _roleSeeder.SeedRolesAsync();
-                return Ok("Roles seeded successfully.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to seed roles: " + ex.Message);
-            }
-
-        }
-
-        [HttpGet("profile")]
-        [Authorize] // This requires an authenticated user with a valid token
-        public IActionResult GetUserProfile()
-        {
-            // Access the user's claims
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-
-            // Access a specific claim
-            var role = User.FindFirst(ClaimTypes.Actor)?.Value;
-
-            // Example of role-based authorization
-            if (role == "ADMIN")
-            {
-                // Return admin-specific data
-                return Ok("Admin Profile");
-            }
-            else
-            {
-                // Return subscriber-specific data
-                return Ok("Subscriber Profile");
-            }
-        }
 
 
 
         // Route -> Register
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [Route("register")]
         
@@ -118,44 +77,76 @@ namespace Lab3WebAPI.Controllers.v1
             {
                 return Unauthorized("Invalid username or password.");
             }
-
-            var token = _jwtService.GenerateToken(user);
+            var role = await _userManager.GetRolesAsync(user);
+            var token = _jwtService.GenerateToken(user, role.FirstOrDefault());
             await _userManager.SetAuthenticationTokenAsync(user,"", "", token);
             return Ok(new { Token = token });
 
         }
 
-        private string GenerateNewJsonWebToken(List<Claim> claims)
+
+
+      
+        // Route For Seeding my roles to DB
+        [HttpPost]
+        [Route("seed-roles")]
+        public async Task<IActionResult> SeedRoles()
         {
-            var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
-            var tokenObject = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(1),
-                    claims: claims,
-                    signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
-                );
+            try
+            {
+                await _roleSeeder.SeedRolesAsync();
+                return Ok("Roles seeded successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to seed roles: " + ex.Message);
+            }
 
-            string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
-
-            return token;
         }
 
-/*        // Route -> make user -> admin
-        [HttpPost]
-        [Route("make-admin")]
-        public async Task<IActionResult> MakeAdmin([FromBody] UpdatePermission updatePermissionDto)
+        [HttpGet("profile")]
+        [Authorize] // This requires an authenticated user with a valid token
+        public IActionResult GetUserProfile()
         {
-            var user = await _userManager.FindByNameAsync(updatePermissionDto.Name);
+            // Access the user's claims
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
 
-            if (user is null)
-                return BadRequest("Invalid User name!!!!!!!!");
+            // Access a specific claim
+            var role = User.FindFirst(ClaimTypes.Actor)?.Value;
 
-            await _userManager.AddToRoleAsync(user, UserRoles.ADMIN);
+            // Example of role-based authorization
+            if (role == UserRoles.ADMIN)
+            {
+                // Return admin-specific data
+                return Ok("Admin Profile");
+            }
+            else
+            {
+                // Return subscriber-specific data
+                return Ok("Subscriber Profile");
+            }
+        }
 
-            return Ok("User is now an ADMIN");
-        }*/
+
+
+
+
+        /*        // Route -> make user -> admin
+                [HttpPost]
+                [Route("make-admin")]
+                public async Task<IActionResult> MakeAdmin([FromBody] UpdatePermission updatePermissionDto)
+                {
+                    var user = await _userManager.FindByNameAsync(updatePermissionDto.Name);
+
+                    if (user is null)
+                        return BadRequest("Invalid User name!!!!!!!!");
+
+                    await _userManager.AddToRoleAsync(user, UserRoles.ADMIN);
+
+                    return Ok("User is now an ADMIN");
+                }*/
 
     }
 }

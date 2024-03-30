@@ -1,5 +1,6 @@
 ﻿using Lab3WebAPI.Entities;
 using Lab3WebAPI.Interfaces;
+using Lab3WebAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
@@ -18,7 +19,7 @@ namespace Lab3WebAPI.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(IdentityUser user)
+        public string GenerateToken(IdentityUser user, String role)
         {
             // Get the secret key from configuration
             var secretKey = _configuration["Jwt:SecretKey"];
@@ -28,8 +29,8 @@ namespace Lab3WebAPI.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Actor, "ADMIN"),
-                new Claim(ClaimTypes.Role, "ADMIN")
+                new Claim(ClaimTypes.Actor, role),
+                new Claim(ClaimTypes.Role, role)
              };
 
             // Retrieve user roles

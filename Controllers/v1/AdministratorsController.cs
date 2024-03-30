@@ -8,77 +8,173 @@ using Microsoft.EntityFrameworkCore;
 using Lab3WebAPI.Entities;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
+using Lab3WebAPI.Models;
+using Microsoft.AspNetCore.Identity;
+using Lab3WebAPI.Interfaces;
+using Lab3WebAPI.Services;
 
 namespace Lab3WebAPI.Controllers.v1
 {
 
     [ApiVersion("1.0")]
+    [Authorize(Roles = "ADMIN")]
     [Route("api/v{version:apiVersion}/Administrators")]
     [ApiController]
     public class AdministratorsController : ControllerBase
     {
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly JwtService _jwtService;
         private readonly TelephoneDbContext _context;
+     
 
-        public AdministratorsController(TelephoneDbContext context)
+        public AdministratorsController(UserManager<IdentityUser> userManager, TelephoneDbContext context, IJwtService jwtService)
         {
+            _userManager = userManager;
             _context = context;
+            _jwtService = (JwtService)jwtService;
         }
 
-        // GET: api/Administrators
+       // GET: api/Administrators
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Administrator>>> GetAdministrators()
+        public async Task<IActionResult> GetAdmins()
         {
-            throw new NotImplementedException();
+            var admins = await _userManager.GetUsersInRoleAsync(UserRoles.ADMIN);
+            return Ok(admins);
         }
 
         // GET: api/Administrators/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Administrator>> GetAdministrator(int id)
+        [HttpGet("subscribers")]
+        public async Task<ActionResult> GetSubscribers()
         {
-            throw new NotImplementedException();
+            var admins = await _userManager.GetUsersInRoleAsync(UserRoles.SUBSCRIBER);
+            return Ok(admins);
         }
 
-        // PUT: api/Administrators/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdministrator(int id, Administrator administrator)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IdentityUser>> GetSubscriber(String id)
         {
-            if (id != administrator.Id)
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
             {
-                return BadRequest();
+                return NotFound(); // User not found
             }
+            return user;
+        }
 
-            _context.Entry(administrator).State = EntityState.Modified;
 
+        // GET: api/Administrators/5
+        [HttpGet("accounts")]
+        public async Task<ActionResult> GetUnpaidAccounts()
+        {
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return NotFound();
-            }
+                // Query the database for records with status false
+                var records = await _context.Bills
+                    .Where(r => r.Status == false)
+                    .ToListAsync();
 
-            return NoContent();
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing request.");
+            }
         }
+
+        [HttpGet("{id} /Accounts")]
+        public async Task<ActionResult<Bill>> GetUnpaidAccount(String id)
+        {
+            try
+            {
+
+                // Query the database for records with status false and matching the specified ID
+                var records = await _context.Bills
+                    .Where(r => r.Status == false && r.SubscriberId == id)
+                    .ToListAsync();
+
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions and return an error response
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+
+
+
 
         // POST: api/Administrators
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("create-subscriber")]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateSubscriber(string username, string email, string password)
+        public async Task<ActionResult<string>> CreateSubscriber([FromBody] RegisterRequestModel registerRequestModel)
         {
-            // Only users with the "admin" role can access this action
 
-            // Create subscriber logic
-            throw new NotImplementedException();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new User { UserName = registerRequestModel.Name };
+
+            var result = await _userManager.CreateAsync(user, registerRequestModel.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("Error while creating");
+            }
+
+            // Add user to the "SUBSCRIBER" role
+            await _userManager.AddToRoleAsync(user, "SUBSCRIBER");
+
+            // Create a corresponding entry in the "Subscribers" table
+            var subscriber = new Subscriber { id = user.Id, Name = registerRequestModel.Name, Password=registerRequestModel.Password};
+            _context.Subscribers.Add(subscriber);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Registration successful" });
         }
 
         // DELETE: api/Administrators/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAdministrator(int id)
+        public async Task<IActionResult> DeleteSubscriber(string id)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(); // User not found
+            }
+
+
+            // Check if the user is a subscriber
+            if (await _userManager.IsInRoleAsync(user, UserRoles.SUBSCRIBER))
+            {
+                // Proceed with deletion
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    var subscriber = await _context.Subscribers.FindAsync(id);
+                    if (subscriber != null)
+                    {
+                        _context.Subscribers.Remove(subscriber);
+                        await _context.SaveChangesAsync();
+
+                    }
+                        return NoContent(); // Successfully deleted
+                }
+                else
+                {
+                    // Failed to delete user, return error messages
+                    return BadRequest(result.Errors);
+                }
+
+                
+            }
+            else
+            {
+                return Forbid(); // User is not a subscriber, forbid deletion
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Lab3WebAPI
         public AutoMapperProfile()
         {
             CreateMap<RegisterRequestModel, Subscriber>().ReverseMap();
+            CreateMap<ServiceModel, Service > ();
         }
     }
 }

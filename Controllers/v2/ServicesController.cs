@@ -46,7 +46,7 @@ namespace Lab3WebAPI.Controllers.v2
         // PUT: api/Services/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutService(int id, Service service)
+        public async Task<IActionResult> PutService(string id, Service service)
         {
             if (id != service.Id)
             {
@@ -101,7 +101,7 @@ namespace Lab3WebAPI.Controllers.v2
             return NoContent();
         }
 
-        private bool ServiceExists(int id)
+        private bool ServiceExists(string id)
         {
             return _context.Services.Any(e => e.Id == id);
         }

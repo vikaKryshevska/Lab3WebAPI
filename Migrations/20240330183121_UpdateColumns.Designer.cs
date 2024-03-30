@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab3WebAPI.Migrations
 {
     [DbContext(typeof(TelephoneDbContext))]
-    [Migration("20240327165135_AddIdentityContext")]
-    partial class AddIdentityContext
+    [Migration("20240330183121_UpdateColumns")]
+    partial class UpdateColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,11 @@ namespace Lab3WebAPI.Migrations
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Bill", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<double>("Prise")
                         .HasColumnType("float");
@@ -39,8 +39,9 @@ namespace Lab3WebAPI.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<int>("SubscriberId")
-                        .HasColumnType("int");
+                    b.Property<string>("SubscriberId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -51,11 +52,12 @@ namespace Lab3WebAPI.Migrations
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Service", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -74,15 +76,8 @@ namespace Lab3WebAPI.Migrations
 
             modelBuilder.Entity("Lab3WebAPI.Entities.Subscriber", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -94,7 +89,7 @@ namespace Lab3WebAPI.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("Subscriber");
+                    b.ToTable("Subscribers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -297,11 +292,11 @@ namespace Lab3WebAPI.Migrations
 
             modelBuilder.Entity("ServiceSubscriber", b =>
                 {
-                    b.Property<int>("ServicesId")
-                        .HasColumnType("int");
+                    b.Property<string>("ServicesId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Subscribersid")
-                        .HasColumnType("int");
+                    b.Property<string>("Subscribersid")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ServicesId", "Subscribersid");
 
@@ -313,7 +308,7 @@ namespace Lab3WebAPI.Migrations
             modelBuilder.Entity("Lab3WebAPI.Entities.Bill", b =>
                 {
                     b.HasOne("Lab3WebAPI.Entities.Subscriber", "Subscriber")
-                        .WithMany()
+                        .WithMany("Bills")
                         .HasForeignKey("SubscriberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -385,6 +380,11 @@ namespace Lab3WebAPI.Migrations
                         .HasForeignKey("Subscribersid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Lab3WebAPI.Entities.Subscriber", b =>
+                {
+                    b.Navigation("Bills");
                 });
 #pragma warning restore 612, 618
         }

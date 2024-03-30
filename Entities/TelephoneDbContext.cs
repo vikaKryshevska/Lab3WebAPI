@@ -13,6 +13,7 @@ namespace Lab3WebAPI.Entities
             : base(options) { }
 
         public DbSet<Service> Services { get; set; }
+        public DbSet<Subscriber> Subscribers { get; set; }
 
         public DbSet<Bill> Bills { get; set; }
 

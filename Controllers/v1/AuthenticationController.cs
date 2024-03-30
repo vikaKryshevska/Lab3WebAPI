@@ -33,14 +33,12 @@ namespace Lab3WebAPI.Controllers.v1
             _configuration = configuration;
             _jwtService = (JwtService)jwtService;
             _roleSeeder = roleSeeder;
-            _roleSeeder = roleSeeder;
         }
 
 
 
 
         // Route -> Register
-        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [Route("register")]
         
@@ -61,7 +59,7 @@ namespace Lab3WebAPI.Controllers.v1
                 return BadRequest("Error while creating");
             }
 
-            await _userManager.AddToRoleAsync(user, registerRequestModel.role);   
+            await _userManager.AddToRoleAsync(user, UserRoles.ADMIN);   
             
             return CreatedAtAction(nameof(Register), registerRequestModel);
         }
@@ -83,8 +81,6 @@ namespace Lab3WebAPI.Controllers.v1
             return Ok(new { Token = token });
 
         }
-
-
 
       
         // Route For Seeding my roles to DB

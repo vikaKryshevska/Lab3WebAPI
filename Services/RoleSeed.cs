@@ -1,5 +1,4 @@
 ﻿using Lab3WebAPI.Entities;
-using Lab3WebAPI.Migrations;
 using Lab3WebAPI.Models;
 using Microsoft.AspNetCore.Identity;
 

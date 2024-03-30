@@ -9,11 +9,10 @@ namespace Lab3WebAPI.Models
 
         [Required]
         public string Name { get; set; }
+        [Required] 
+        public string role { get; set; }
 
         [Required]
         public string Password { get; set; }
-
-        [Required]
-        public string ConfirmedPassword { get; set; }
     }
 }

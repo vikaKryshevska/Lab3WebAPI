@@ -11,6 +11,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Data;
+using Lab3WebAPI.Services;
+using Lab3WebAPI.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,7 @@ builder.Services.AddDbContext<TelephoneDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("TelephoneDbContext"));
 });
+
 
 
 builder.Services.AddControllers();
@@ -74,14 +77,20 @@ builder.Services
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.Password.RequiredLength = 6;
+    options.Password.RequiredLength = 4;
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric= false;
     options.SignIn.RequireConfirmedEmail = false;
-
 });
+
+
+builder.Services.AddTransient<RoleSeed>();
+
+
+builder.Services.AddTransient<IJwtService, JwtService>();
+
 
 builder.Services
     .AddAuthentication(options =>
@@ -96,16 +105,29 @@ builder.Services
         o.RequireHttpsMetadata = false;
         o.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey
-        (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = false,
-            ValidateIssuerSigningKey = true
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+
         };
     });
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy =>
+    {
+        policy.RequireRole("ADMIN");
+    });
+});
+
+
+
+
 
 
 
@@ -128,6 +150,8 @@ if (app.Environment.IsDevelopment())
         }
     });
 }
+
+
 
 
 app.UseHttpsRedirection();

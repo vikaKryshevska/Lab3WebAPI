@@ -11,8 +11,6 @@ namespace Lab3WebAPI.Services
 {
     public class AuthService
     {
-
-
         private readonly TelephoneDbContext dataContext;
         private readonly IConfiguration configuration;
 
@@ -22,13 +20,13 @@ namespace Lab3WebAPI.Services
             this.configuration = configuration;
         }
 
-        public bool IsAuthenticated(string name, string password)
+        /*public bool IsAuthenticated(string name, string password)
         {
             var user = this.GetByName(name);
             return this.DoesSubscribersExists(name) && BC.Verify(password, user.Password);
-        }
+        }*/
 
-        public bool DoesSubscribersExists(string name)
+        /*public bool DoesSubscribersExists(string name)
         {
             var user = this.dataContext.Subscribers.FirstOrDefault(x => x.Name == name);
             return user != null;
@@ -65,7 +63,7 @@ namespace Lab3WebAPI.Services
             this.dataContext.SaveChanges();
 
             return userEntity.Entity;
-        }
+        }*/
 
 
 
@@ -108,15 +106,14 @@ namespace Lab3WebAPI.Services
             return t.Payload.FirstOrDefault(x => x.Key == "name").Value.ToString();
         }
 
-        public Subscriber ChangeRole(string name, string role)
+/*        public Subscriber ChangeRole(string name, string role)
         {
             var user = this.GetByName(name);
-            user.Role = role;
             this.dataContext.SaveChanges();
 
 
             return user;
-        }
+        }*/
 
 
 

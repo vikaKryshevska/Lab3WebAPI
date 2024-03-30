@@ -33,8 +33,8 @@ namespace Lab3WebAPI.Controllers.v1
             {
                 try
                 {
-                    var users = this.authService.GetAll();
-                    return Ok(users);
+                    throw new NotImplementedException();
+                    return Ok();
                 }
                 catch (Exception error)
                 {

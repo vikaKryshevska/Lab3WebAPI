@@ -23,19 +23,7 @@ namespace Lab3WebAPI.Services
 
         public Service[] GetAllForUser(string name)
         {
-            var user = this.dataContext.Subscribers
-                                       .Include(u => u.Services)
-                                       .FirstOrDefault(user => user.Name == name);
-
-            return this.dataContext.Services
-                                   .Include(ev => ev.Subscribers)
-                                   .Where(e => e.Subscribers.FirstOrDefault(ue => ue.Name == user.Name) != null)
-                                   .ToArray();
-
-           /* return this.dataContext.Services
-                                  .Include(ev => ev.Subscribers)
-                                  .Where(e => e.Subscribers.FirstOrDefault(ue => ue.UserName == user.Name) != null)
-                                  .ToArray();*/
+            throw new NotImplementedException();
         }
 
         public Service GetByName(string name)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab3WebAPI.Entities;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lab3WebAPI.Controllers.v1
 {
@@ -27,21 +28,14 @@ namespace Lab3WebAPI.Controllers.v1
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Administrator>>> GetAdministrators()
         {
-            return await _context.Administrators.ToListAsync();
+            throw new NotImplementedException();
         }
 
         // GET: api/Administrators/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Administrator>> GetAdministrator(int id)
         {
-            var administrator = await _context.Administrators.FindAsync(id);
-
-            if (administrator == null)
-            {
-                return NotFound();
-            }
-
-            return administrator;
+            throw new NotImplementedException();
         }
 
         // PUT: api/Administrators/5
@@ -62,14 +56,7 @@ namespace Lab3WebAPI.Controllers.v1
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AdministratorExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -77,34 +64,21 @@ namespace Lab3WebAPI.Controllers.v1
 
         // POST: api/Administrators
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Administrator>> PostAdministrator(Administrator administrator)
+        [HttpPost("create-subscriber")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CreateSubscriber(string username, string email, string password)
         {
-            _context.Administrators.Add(administrator);
-            await _context.SaveChangesAsync();
+            // Only users with the "admin" role can access this action
 
-            return CreatedAtAction("GetAdministrator", new { id = administrator.Id }, administrator);
+            // Create subscriber logic
+            throw new NotImplementedException();
         }
 
         // DELETE: api/Administrators/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAdministrator(int id)
         {
-            var administrator = await _context.Administrators.FindAsync(id);
-            if (administrator == null)
-            {
-                return NotFound();
-            }
-
-            _context.Administrators.Remove(administrator);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AdministratorExists(int id)
-        {
-            return _context.Administrators.Any(e => e.Id == id);
+            throw new NotImplementedException();
         }
     }
 }

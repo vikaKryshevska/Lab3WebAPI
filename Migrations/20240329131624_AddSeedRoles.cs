@@ -5,7 +5,7 @@
 namespace Lab3WebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class WorkingDBWithotSubsriberServicesEntity : Migration
+    public partial class AddSeedRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
